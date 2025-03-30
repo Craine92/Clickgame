@@ -691,6 +691,7 @@ function updateDisplay() {
     updateResearchDisplay();
     updateUnitDisplay();
     updatePlayTimeDisplay();
+    updateUpgradeButtons();
 }
 
 // Berechne die Produktionsrate
@@ -749,6 +750,7 @@ function produceResources() {
     }
     
     updateResourceDisplay();
+    updateUpgradeButtons();
     saveGameState();
 }
 
@@ -931,14 +933,22 @@ function updateUpgradeButtons() {
     const warehouseCosts = calculateUpgradeCosts('warehouse');
     const warehouseBtn = document.getElementById('warehouse-upgrade');
     if (warehouseBtn) {
-        warehouseBtn.textContent = `Verbessern (${Object.entries(warehouseCosts)
+        const costText = Object.entries(warehouseCosts)
             .map(([resource, cost]) => `${cost} ${resource}`)
-            .join(', ')})`;
+            .join(', ');
+        
+        warehouseBtn.textContent = `Verbessern (${costText})`;
         
         const canUpgradeWarehouse = Object.entries(warehouseCosts)
             .every(([resource, cost]) => gameState[resource] >= cost);
         
         warehouseBtn.disabled = !canUpgradeWarehouse;
+        // Entferne die deaktivierte Klasse wenn genügend Ressourcen vorhanden sind
+        if (canUpgradeWarehouse) {
+            warehouseBtn.classList.remove('disabled');
+        } else {
+            warehouseBtn.classList.add('disabled');
+        }
     }
 }
 
@@ -996,10 +1006,17 @@ function initGame() {
     if (window.timeInterval) {
         clearInterval(window.timeInterval);
     }
+    if (window.buttonInterval) {
+        clearInterval(window.buttonInterval);
+    }
     
-    // Starte die Ressourcenproduktion (jede Sekunde) und Zeitaktualisierung
+    // Starte die Intervalle
     window.productionInterval = setInterval(produceResources, 1000);
     window.timeInterval = setInterval(updatePlayTimeDisplay, 1000);
+    window.buttonInterval = setInterval(() => {
+        updateUpgradeButtons();
+        updateBuildingDisplay();
+    }, 3000);
 }
 
 // Reset-Funktion
