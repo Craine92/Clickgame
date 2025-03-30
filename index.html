@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die Stämme - Dorf</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html" class="nav-btn active">Dorf</a>
+            <a href="barracks.html" class="nav-btn">Kaserne</a>
+            <a href="map.html" class="nav-btn">Karte</a>
+            <span class="play-time-container">⏱️ <span class="play-time">00:00:00</span></span>
+        </nav>
+
+        <div class="top-bar">
+            <div class="resources">
+                <div class="resource">
+                    <span class="resource-icon">🌳</span>
+                    <span id="wood">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⛰️</span>
+                    <span id="clay">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚒️</span>
+                    <span id="iron">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <span id="crop">0</span>
+                </div>
+            </div>
+
+            <div class="units-display">
+                <div class="unit-count">
+                    <span class="unit-icon-small">⚔️</span>
+                    <span id="spearman-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🏹</span>
+                    <span id="archer-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🐎</span>
+                    <span id="cavalry-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <h1>Dorf</h1>
+
+        <div class="buildings-list">
+            <div class="building-tile" data-building="woodcutter">
+                <h3>Holzfäller</h3>
+                <div class="building-icon">🌳</div>
+                <p>Produziert Holz</p>
+                <p class="production-rate">+<span id="wood-rate">10</span> / 30s</p>
+                <p>Stufe: <span id="woodcutter-level">0</span></p>
+                <button onclick="build('woodcutter')" class="build-btn">Bauen</button>
+                <button onclick="upgradeBuilding('woodcutter')" class="upgrade-btn">
+                    Verbessern (+5% Produktion) (<span id="woodcutter-upgrade-cost">100</span> Holz)
+                </button>
+            </div>
+
+            <div class="building-tile" data-building="clay_pit">
+                <h3>Lehmgrube</h3>
+                <div class="building-icon">⛰️</div>
+                <p>Produziert Lehm</p>
+                <p class="production-rate">+<span id="clay-rate">10</span> / 30s</p>
+                <p>Stufe: <span id="clay_pit-level">0</span></p>
+                <button onclick="build('clay_pit')" class="build-btn">Bauen</button>
+                <button onclick="upgradeBuilding('clay_pit')" class="upgrade-btn">
+                    Verbessern (+5% Produktion) (<span id="clay_pit-upgrade-cost">100</span> Lehm)
+                </button>
+            </div>
+
+            <div class="building-tile" data-building="iron_mine">
+                <h3>Eisenmine</h3>
+                <div class="building-icon">⚒️</div>
+                <p>Produziert Eisen</p>
+                <p class="production-rate">+<span id="iron-rate">10</span> / 30s</p>
+                <p>Stufe: <span id="iron_mine-level">0</span></p>
+                <button onclick="build('iron_mine')" class="build-btn">Bauen</button>
+                <button onclick="upgradeBuilding('iron_mine')" class="upgrade-btn">
+                    Verbessern (+5% Produktion) (<span id="iron_mine-upgrade-cost">100</span> Eisen)
+                </button>
+            </div>
+
+            <div class="building-tile" data-building="farm">
+                <h3>Bauernhof</h3>
+                <div class="building-icon">🌾</div>
+                <p>Produziert Getreide</p>
+                <p class="production-rate">+<span id="crop-rate">10</span> / 30s</p>
+                <p>Stufe: <span id="farm-level">0</span></p>
+                <button onclick="build('farm')" class="build-btn">Bauen</button>
+                <button onclick="upgradeBuilding('farm')" class="upgrade-btn">
+                    Verbessern (+5% Produktion) (<span id="farm-upgrade-cost">100</span> Getreide)
+                </button>
+            </div>
+        </div>
+
+        <button class="reset-button" onclick="resetGame()">Spiel zurücksetzen</button>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        window.onload = initGame;
+    </script>
+</body>
+</html> 

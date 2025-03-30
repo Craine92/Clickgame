@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die Stämme - Forschung</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html" class="nav-btn">Dorf</a>
+            <a href="research.html" class="nav-btn active">Forschung</a>
+            <a href="barracks.html" class="nav-btn">Kaserne</a>
+            <a href="map.html" class="nav-btn">Karte</a>
+            <span class="play-time-container">⏱️ <span class="play-time">00:00:00</span></span>
+        </nav>
+
+        <div class="top-bar">
+            <div class="resources">
+                <div class="resource">
+                    <span class="resource-icon">🌳</span>
+                    <span id="wood">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⛰️</span>
+                    <span id="clay">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚒️</span>
+                    <span id="iron">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <span id="crop">0</span>
+                </div>
+            </div>
+
+            <div class="units-display">
+                <div class="unit-count">
+                    <span class="unit-icon-small">⚔️</span>
+                    <span id="spearman-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🏹</span>
+                    <span id="archer-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🐎</span>
+                    <span id="cavalry-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-section active">
+            <h2>Forschung</h2>
+            <div class="research-list">
+                <div class="research-item" data-research="wood_production">
+                    <h3>Holzproduktion 🌳</h3>
+                    <p>Verbessert die Holzproduktion um 20% pro Stufe</p>
+                    <p>Aktueller Bonus: +<span data-resource="wood">0</span>%</p>
+                    <p>Stufe: <span class="level">1</span></p>
+                    <button onclick="research('wood_production')">Erforschen</button>
+                </div>
+
+                <div class="research-item" data-research="clay_production">
+                    <h3>Lehmproduktion 🏺</h3>
+                    <p>Verbessert die Lehmproduktion um 20% pro Stufe</p>
+                    <p>Aktueller Bonus: +<span data-resource="clay">0</span>%</p>
+                    <p>Stufe: <span class="level">1</span></p>
+                    <button onclick="research('clay_production')">Erforschen</button>
+                </div>
+
+                <div class="research-item" data-research="iron_production">
+                    <h3>Eisenproduktion ⚒️</h3>
+                    <p>Verbessert die Eisenproduktion um 20% pro Stufe</p>
+                    <p>Aktueller Bonus: +<span data-resource="iron">0</span>%</p>
+                    <p>Stufe: <span class="level">1</span></p>
+                    <button onclick="research('iron_production')">Erforschen</button>
+                </div>
+
+                <div class="research-item" data-research="crop_production">
+                    <h3>Getreideproduktion 🌾</h3>
+                    <p>Verbessert die Getreideproduktion um 20% pro Stufe</p>
+                    <p>Aktueller Bonus: +<span data-resource="crop">0</span>%</p>
+                    <p>Stufe: <span class="level">1</span></p>
+                    <button onclick="research('crop_production')">Erforschen</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="reset-button" onclick="resetGame()">Spiel zurücksetzen</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html> 

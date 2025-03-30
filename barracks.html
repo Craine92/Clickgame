@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die Stämme - Kaserne</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html" class="nav-btn">Dorf</a>
+            <a href="barracks.html" class="nav-btn active">Kaserne</a>
+            <a href="map.html" class="nav-btn">Karte</a>
+            <span class="play-time-container">⏱️ <span class="play-time">00:00:00</span></span>
+        </nav>
+
+        <div class="top-bar">
+            <div class="resources">
+                <div class="resource">
+                    <span class="resource-icon">🌳</span>
+                    <span id="wood">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⛰️</span>
+                    <span id="clay">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚒️</span>
+                    <span id="iron">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <span id="crop">0</span>
+                </div>
+            </div>
+
+            <div class="units-display">
+                <div class="unit-count">
+                    <span class="unit-icon-small">⚔️</span>
+                    <span id="spearman-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🏹</span>
+                    <span id="archer-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🐎</span>
+                    <span id="cavalry-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <h1>Kaserne</h1>
+
+        <div class="units-list">
+            <div class="unit" data-unit="spearman">
+                <h3>Ritter</h3>
+                <span class="unit-icon">⚔️</span>
+                <div class="unit-stats">
+                    <div class="stat">
+                        <span class="stat-icon">❤️</span>
+                        <span data-stat="health">60</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">⚔️</span>
+                        <span data-stat="attack">25</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🛡️</span>
+                        <span data-stat="defense">20</span>
+                    </div>
+                </div>
+                <div class="unit-costs">
+                    <div class="cost">
+                        <span class="cost-icon">⚒️</span>
+                        <span>80</span>
+                    </div>
+                    <div class="cost">
+                        <span class="cost-icon">⛰️</span>
+                        <span>50</span>
+                    </div>
+                    <div class="cost">
+                        <span class="cost-icon">🌾</span>
+                        <span>30</span>
+                    </div>
+                </div>
+                <button onclick="trainUnit('spearman')" class="train-button">Ausbilden</button>
+                <button onclick="upgradeUnit('spearman')" class="upgrade-button">Verbessern (+5 ❤️/⚔️/🛡️)</button>
+            </div>
+
+            <div class="unit" data-unit="archer">
+                <h3>Bogenschütze</h3>
+                <span class="unit-icon">🏹</span>
+                <div class="unit-stats">
+                    <div class="stat">
+                        <span class="stat-icon">❤️</span>
+                        <span data-stat="health">40</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">⚔️</span>
+                        <span data-stat="attack">15</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🛡️</span>
+                        <span data-stat="defense">5</span>
+                    </div>
+                </div>
+                <div class="unit-costs">
+                    <div class="cost">
+                        <span class="cost-icon">🌳</span>
+                        <span>60</span>
+                    </div>
+                    <div class="cost">
+                        <span class="cost-icon">⚒️</span>
+                        <span>30</span>
+                    </div>
+                    <div class="cost">
+                        <span class="cost-icon">🌾</span>
+                        <span>25</span>
+                    </div>
+                </div>
+                <button onclick="trainUnit('archer')" class="train-button">Ausbilden</button>
+                <button onclick="upgradeUnit('archer')" class="upgrade-button">Verbessern (+5 ❤️/⚔️/🛡️)</button>
+            </div>
+
+            <div class="unit" data-unit="cavalry">
+                <h3>Kavallerie</h3>
+                <span class="unit-icon">🐎</span>
+                <div class="unit-stats">
+                    <div class="stat">
+                        <span class="stat-icon">❤️</span>
+                        <span data-stat="health">70</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">⚔️</span>
+                        <span data-stat="attack">20</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🛡️</span>
+                        <span data-stat="defense">10</span>
+                    </div>
+                </div>
+                <div class="unit-costs">
+                    <div class="cost">
+                        <span class="cost-icon">⚒️</span>
+                        <span>75</span>
+                    </div>
+                    <div class="cost">
+                        <span class="cost-icon">⛰️</span>
+                        <span>50</span>
+                    </div>
+                    <div class="cost">
+                        <span class="cost-icon">🌾</span>
+                        <span>40</span>
+                    </div>
+                </div>
+                <button onclick="trainUnit('cavalry')" class="train-button">Ausbilden</button>
+                <button onclick="upgradeUnit('cavalry')" class="upgrade-button">Verbessern (+5 ❤️/⚔️/🛡️)</button>
+            </div>
+        </div>
+
+        <button class="reset-button" onclick="resetGame()">Spiel zurücksetzen</button>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        // Initialisiere das Spiel beim Laden der Seite
+        window.onload = initGame;
+    </script>
+</body>
+</html> 

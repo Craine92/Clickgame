@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die Stämme - Karte</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html" class="nav-btn">Dorf</a>
+            <a href="barracks.html" class="nav-btn">Kaserne</a>
+            <a href="map.html" class="nav-btn active">Karte</a>
+            <span class="play-time-container">⏱️ <span class="play-time">00:00:00</span></span>
+        </nav>
+
+        <div class="top-bar">
+            <div class="resources">
+                <div class="resource">
+                    <span class="resource-icon">🌳</span>
+                    <span id="wood">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⛰️</span>
+                    <span id="clay">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚒️</span>
+                    <span id="iron">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <span id="crop">0</span>
+                </div>
+            </div>
+
+            <div class="units-display">
+                <div class="unit-count">
+                    <span class="unit-icon-small">⚔️</span>
+                    <span id="spearman-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🏹</span>
+                    <span id="archer-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🐎</span>
+                    <span id="cavalry-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <h1>Karte</h1>
+
+        <div class="map-container">
+            <div class="map-controls">
+                <button onclick="generateMap()">Neue Karte generieren</button>
+                <button onclick="centerMap()">Karte zentrieren</button>
+            </div>
+
+            <div class="map-grid"></div>
+
+            <div class="map-legend">
+                <div class="legend-item">
+                    <div class="legend-color owned"></div>
+                    <span>Eigenes Dorf</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color enemy"></div>
+                    <span>Feindliches Dorf</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color neutral"></div>
+                    <span>Neutrales Dorf</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="reset-button" onclick="resetGame()">Spiel zurücksetzen</button>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        window.onload = initGame;
+    </script>
+</body>
+</html> 

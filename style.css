@@ -1,0 +1,700 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 10px;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Navigation */
+nav {
+    display: flex;
+    background-color: #2d3748;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    align-items: center;
+    justify-content: space-between;
+}
+
+nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.nav-btn {
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: 1em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.nav-btn:hover {
+    background-color: #4a5568;
+}
+
+.nav-btn.active {
+    background-color: #4299e1;
+}
+
+/* Spielzeitanzeige */
+.play-time-container {
+    color: white;
+    padding: 8px 16px;
+    background-color: #4a5568;
+    border-radius: 4px;
+    margin-left: auto;
+    white-space: nowrap;
+    font-family: monospace;
+    font-size: 1.1em;
+}
+
+.play-time {
+    margin-left: 5px;
+}
+
+/* Responsive Design für Navigation */
+@media (max-width: 480px) {
+    nav {
+        padding: 6px;
+        gap: 4px;
+    }
+
+    .nav-btn {
+        padding: 8px 12px;
+        font-size: 0.9em;
+    }
+
+    .play-time-container {
+        padding: 6px 10px;
+        font-size: 0.9em;
+    }
+}
+
+/* Header-Bereich mit Ressourcen und Einheiten */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    background-color: #2d3748;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Ressourcenanzeige */
+.resources {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.resources span {
+    color: #4299e1;
+    white-space: nowrap;
+}
+
+/* Einheitenanzeige */
+.units-display {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.units-display span {
+    color: #4299e1;
+    white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+    .top-bar {
+        flex-direction: column;
+        padding: 8px;
+    }
+
+    .resources, .units-display {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+.resources-bar {
+    display: flex;
+    justify-content: space-between;
+    background-color: #2d3748;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.resources, .units-display {
+    display: flex;
+    gap: 20px;
+}
+
+.resource {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #3498db;
+    font-size: 1.1em;
+    background-color: #34495e;
+    padding: 5px 10px;
+    border-radius: 4px;
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.resource span {
+    font-weight: bold;
+}
+
+.resource-icon {
+    font-size: 1.2em;
+}
+
+/* Einheitenliste */
+.units-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.unit {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.unit:hover {
+    transform: translateY(-5px);
+}
+
+.unit h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 1.3em;
+}
+
+.unit-icon {
+    font-size: 2.5em;
+    margin: 10px 0;
+    display: block;
+}
+
+.unit p {
+    margin: 8px 0;
+    color: #7f8c8d;
+}
+
+/* Einheitenstats */
+.unit-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 15px 0;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-icon {
+    font-size: 1.4em;
+}
+
+[data-stat] {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+}
+
+[data-stat].improved {
+    color: #27ae60;
+    transform: scale(1.1);
+}
+
+/* Einheitenkosten */
+.unit-costs {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.cost {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #7f8c8d;
+}
+
+.cost-icon {
+    font-size: 1.2em;
+}
+
+/* Buttons */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+button:hover:not(:disabled) {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+.reset-button {
+    background-color: #e74c3c;
+    margin-top: 20px;
+}
+
+.reset-button:hover {
+    background-color: #c0392b;
+}
+
+/* Überschriften */
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin: 15px 0;
+    font-size: 1.8em;
+}
+
+/* Forschungsliste */
+.research-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.research-item {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.research-item:hover {
+    transform: translateY(-5px);
+}
+
+.research-item h3 {
+    margin: 0 0 10px 0;
+    color: #2d3748;
+    font-size: 1.3em;
+}
+
+.research-item p {
+    margin: 8px 0;
+    color: #718096;
+}
+
+.research-item button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.research-item button:hover:not(:disabled) {
+    background-color: #3182ce;
+}
+
+.research-item button:disabled {
+    background-color: #a0aec0;
+    cursor: not-allowed;
+}
+
+/* Karte */
+.map-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.map-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.map-tile {
+    aspect-ratio: 1;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.2em;
+}
+
+.map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Allgemeine Textformatierung */
+p {
+    color: #7f8c8d;
+    margin: 8px 0;
+    font-size: 0.9em;
+}
+
+/* Gebäudeliste */
+.buildings-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.building {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.building:hover {
+    transform: translateY(-5px);
+}
+
+.building h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 1.3em;
+}
+
+.building-icon {
+    font-size: 2.5em;
+    margin: 10px 0;
+    display: block;
+}
+
+.building p {
+    margin: 8px 0;
+    color: #7f8c8d;
+}
+
+/* Allgemeine Button-Styles */
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+button:hover:not(:disabled) {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+/* Reset-Button speziell */
+.reset-button {
+    background-color: #e74c3c;
+    margin-top: 20px;
+}
+
+.reset-button:hover {
+    background-color: #c0392b;
+}
+
+/* Einheitliche Karten-Styles */
+.research-item, .building, .unit {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.research-item:hover, .building:hover, .unit:hover {
+    transform: translateY(-5px);
+}
+
+/* Ressourcen-Anzeige */
+.resource, .unit-count {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #3498db;
+    font-size: 1.1em;
+    background-color: #34495e;
+    padding: 5px 10px;
+    border-radius: 4px;
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+}
+
+/* Kosten-Anzeige */
+.costs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    flex-wrap: wrap;
+}
+
+.cost {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+/* Status-Anzeigen */
+.level, .stat span, .production-bonus {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Icons */
+.resource-icon, .unit-icon, .research-icon {
+    font-size: 1.2em;
+}
+
+/* Grid-Layouts */
+.research-list, .buildings-list, .units-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 768px) {
+    .research-list, .buildings-list, .units-list {
+        grid-template-columns: 1fr;
+    }
+
+    button {
+        padding: 12px;
+        font-size: 1.1em;
+    }
+
+    .costs {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+.unit-upgrades {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.unit-upgrades button {
+    background-color: #4a5568;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+}
+
+.unit-upgrades button:hover {
+    background-color: #2d3748;
+}
+
+.unit-upgrades button:disabled {
+    background-color: #718096;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Game Section */
+.game-section {
+    margin-top: 15px;
+}
+
+.game-section h2 {
+    color: #2d3748;
+    margin-bottom: 15px;
+}
+
+/* Einheitenspezifische Buttons */
+.train-button {
+    background-color: #3498db;
+    margin-bottom: 5px;
+}
+
+.train-button:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+.upgrade-button {
+    background-color: #2ecc71;
+    margin-top: 5px;
+}
+
+.upgrade-button:hover:not(:disabled) {
+    background-color: #27ae60;
+}
+
+.train-button:disabled, .upgrade-button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.building-tile {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.build-btn, .upgrade-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.build-btn {
+    background-color: #3498db;
+    color: white;
+}
+
+.build-btn:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+.upgrade-btn {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.upgrade-btn:hover:not(:disabled) {
+    background-color: #27ae60;
+}
+
+.build-btn:disabled, .upgrade-btn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.production-rate {
+    color: #2ecc71;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin: 8px 0;
+}
+
+.building-icon {
+    font-size: 2em;
+    margin: 10px 0;
+} 
