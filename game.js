@@ -28,8 +28,28 @@ const gameState = {
         cavalry: 0
     },
     map: {
-        size: 5,
-        tiles: []
+        size: 7,
+        centerX: 3,
+        centerY: 3,
+        villages: {
+            player: {
+                x: 3,
+                y: 3,
+                type: 'player',
+                name: 'Mein Dorf',
+                resources: {
+                    wood: 100,
+                    clay: 100,
+                    iron: 100,
+                    crop: 100
+                },
+                army: {
+                    spearman: 0,
+                    archer: 0,
+                    cavalry: 0
+                }
+            }
+        }
     },
     unitStats: {
         spearman: {
@@ -95,6 +115,39 @@ const baseUnitStats = {
         level: 0
     }
 };
+
+// Dorftypen und Namen für KI-Dörfer
+const villageTypes = ['neutral', 'enemy'];
+const villageNames = [
+    'Walddorf', 'Berghausen', 'Seeburg', 'Eisental', 'Lehmdorf',
+    'Holzfelden', 'Steinbach', 'Kornfeld', 'Eisenhügel', 'Kupfertal'
+];
+
+// Generiere ein KI-Dorf
+function generateVillage(x, y, type) {
+    const armySize = type === 'neutral' ? 
+        Math.floor(Math.random() * 10) + 5 : // 5-15 Einheiten für neutrale Dörfer
+        Math.floor(Math.random() * 20) + 10;  // 10-30 Einheiten für feindliche Dörfer
+
+    return {
+        x: x,
+        y: y,
+        type: type,
+        name: villageNames[Math.floor(Math.random() * villageNames.length)],
+        resources: {
+            wood: Math.floor(Math.random() * 1000) + 500,
+            clay: Math.floor(Math.random() * 1000) + 500,
+            iron: Math.floor(Math.random() * 800) + 300,
+            crop: Math.floor(Math.random() * 800) + 300
+        },
+        army: {
+            spearman: Math.floor(Math.random() * armySize),
+            archer: Math.floor(Math.random() * armySize),
+            cavalry: Math.floor(Math.random() * armySize)
+        },
+        lastAttacked: 0 // Zeitstempel des letzten Angriffs
+    };
+}
 
 // Speichere den Spielzustand
 function saveGameState() {
@@ -663,11 +716,12 @@ function formatPlayTime(seconds) {
 function updatePlayTimeDisplay() {
     const currentTime = Date.now();
     const elapsedSeconds = Math.floor((currentTime - gameState.gameStartTime) / 1000);
-    const totalSeconds = gameState.totalPlayTime + elapsedSeconds;
     
     const timeDisplays = document.querySelectorAll('.play-time');
     timeDisplays.forEach(display => {
-        display.textContent = formatPlayTime(totalSeconds);
+        if (display) {
+            display.textContent = formatPlayTime(elapsedSeconds);
+        }
     });
 }
 
@@ -785,37 +839,329 @@ function produceResources() {
         }
     }
     
+    // Aktualisiere die Anzeige
     updateResourceDisplay();
     updateUpgradeButtons();
+    
+    // Speichere den Spielzustand
     saveGameState();
+    
+    // Aktualisiere die Spielzeit
+    const currentTime = Date.now();
+    const elapsedSeconds = Math.floor((currentTime - gameState.gameStartTime) / 1000);
+    gameState.totalPlayTime = elapsedSeconds;
 }
 
 // Generiere die Karte
 function generateMap() {
-    const mapGrid = document.querySelector('.map-grid');
-    if (!mapGrid) return; // Beende wenn keine Karte vorhanden ist
-    
-    mapGrid.innerHTML = '';
-    
-    for (let i = 0; i < gameState.map.size * gameState.map.size; i++) {
-        const tile = document.createElement('div');
-        tile.className = 'map-tile';
-        
-        // Zufällige Kacheltypen (für Demo-Zwecke)
-        const random = Math.random();
-        if (random < 0.1) {
-            tile.classList.add('enemy');
-            tile.textContent = '👤';
-        } else if (random < 0.2) {
-            tile.classList.add('owned');
-            tile.textContent = '🏰';
-        } else {
-            tile.classList.add('neutral');
-            tile.textContent = '🌲';
-        }
-        
-        mapGrid.appendChild(tile);
+    const mapContainer = document.querySelector('.map-container');
+    if (!mapContainer) {
+        console.error('Map container not found');
+        return;
     }
+
+    // Erstelle die Kartenlegende
+    const legend = document.createElement('div');
+    legend.className = 'map-legend';
+    legend.innerHTML = `
+        <div class="legend-item">
+            <div class="legend-color owned"></div>
+            <span>Eigenes Dorf</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color neutral"></div>
+            <span>Neutrales Dorf</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color enemy"></div>
+            <span>Feindliches Dorf</span>
+        </div>
+        <div class="legend-item">
+            <span>🌲 Wald</span>
+        </div>
+        <div class="legend-item">
+            <span>⛰️ Berge</span>
+        </div>
+        <div class="legend-item">
+            <span>🌾 Felder</span>
+        </div>
+    `;
+
+    // Erstelle das Kartengitter
+    const mapGrid = document.createElement('div');
+    mapGrid.className = 'map-grid';
+    
+    // Lösche alte Dörfer (außer Spielerdorf)
+    const playerVillage = gameState.map.villages.player;
+    gameState.map.villages = { player: playerVillage };
+
+    // Erstelle das Kartengitter
+    for (let y = 0; y < gameState.map.size; y++) {
+        for (let x = 0; x < gameState.map.size; x++) {
+            const tile = document.createElement('div');
+            tile.className = 'map-tile';
+            
+            const tileContent = document.createElement('div');
+            tileContent.className = 'map-tile-content';
+            
+            // Berechne die Entfernung zum Zentrum
+            const distance = Math.sqrt(
+                Math.pow(x - gameState.map.centerX, 2) + 
+                Math.pow(y - gameState.map.centerY, 2)
+            );
+
+            // Spielerdorf im Zentrum
+            if (x === gameState.map.centerX && y === gameState.map.centerY) {
+                tile.classList.add('player-village');
+                tileContent.innerHTML = `
+                    <div class="village-icon">🏰</div>
+                    <div class="village-name">Mein Dorf</div>
+                `;
+                tile.setAttribute('data-village-id', 'player');
+                tile.addEventListener('click', () => showVillageInfo('player'));
+            } 
+            // Generiere andere Dörfer basierend auf der Entfernung
+            else if (Math.random() < 0.3 && distance <= 4) {
+                const type = distance <= 2 ? 'neutral' : 'enemy';
+                const village = generateVillage(x, y, type);
+                const villageId = `village_${x}_${y}`;
+                gameState.map.villages[villageId] = village;
+
+                tile.classList.add(`${type}-village`);
+                tile.setAttribute('data-village-id', villageId);
+                tileContent.innerHTML = `
+                    <div class="village-icon">${type === 'neutral' ? '🏘️' : '⚔️'}</div>
+                    <div class="village-name">${village.name}</div>
+                `;
+
+                tile.addEventListener('click', () => showVillageInfo(villageId));
+            } else {
+                // Leeres Feld mit Terrain basierend auf Position
+                tile.classList.add('empty');
+                let terrain;
+                const terrainRandom = Math.random();
+                
+                // Mehr Wälder am Rand
+                if (distance > 3) {
+                    terrain = terrainRandom < 0.6 ? '🌲' : terrainRandom < 0.8 ? '⛰️' : '🌾';
+                }
+                // Mehr Felder in der Nähe von Dörfern
+                else if (distance < 2) {
+                    terrain = terrainRandom < 0.6 ? '🌾' : terrainRandom < 0.8 ? '🌲' : '⛰️';
+                }
+                // Ausgewogene Verteilung dazwischen
+                else {
+                    terrain = terrainRandom < 0.4 ? '🌲' : terrainRandom < 0.7 ? '🌾' : '⛰️';
+                }
+                
+                tileContent.innerHTML = `<div class="terrain-icon">${terrain}</div>`;
+            }
+
+            tile.appendChild(tileContent);
+            mapGrid.appendChild(tile);
+        }
+    }
+
+    // Lösche vorhandene Karte und Legende
+    mapContainer.innerHTML = '';
+    
+    // Füge die neue Karte und Legende hinzu
+    mapContainer.appendChild(mapGrid);
+    mapContainer.appendChild(legend);
+    
+    saveGameState();
+}
+
+// Zeige Dorfinformationen
+function showVillageInfo(villageId) {
+    const village = villageId === 'player' ? gameState.map.villages.player : gameState.map.villages[villageId];
+    if (!village) return;
+
+    const infoBox = document.createElement('div');
+    infoBox.className = 'village-info-box';
+    
+    const totalArmy = village.army.spearman + village.army.archer + village.army.cavalry;
+    const canAttack = villageId !== 'player' && Date.now() - (village.lastAttacked || 0) >= 3600000; // 1 Stunde Cooldown
+
+    infoBox.innerHTML = `
+        <h3>${village.name}</h3>
+        <p>Status: ${village.type === 'player' ? 'Eigenes Dorf' : village.type === 'neutral' ? 'Neutral' : 'Feindlich'}</p>
+        <div class="village-resources">
+            <p>Ressourcen:</p>
+            <ul>
+                <li>🌳 Holz: ${village.resources.wood}</li>
+                <li>🏺 Lehm: ${village.resources.clay}</li>
+                <li>⛏️ Eisen: ${village.resources.iron}</li>
+                <li>🌾 Getreide: ${village.resources.crop}</li>
+            </ul>
+        </div>
+        <div class="village-army">
+            <p>Armee (${totalArmy} Einheiten):</p>
+            <ul>
+                <li>⚔️ Ritter: ${village.army.spearman}</li>
+                <li>🏹 Bogenschützen: ${village.army.archer}</li>
+                <li>🐎 Kavallerie: ${village.army.cavalry}</li>
+            </ul>
+        </div>
+        ${villageId !== 'player' ? 
+            canAttack ? 
+                `<button onclick="attackVillage('${villageId}')" class="attack-btn">Angreifen</button>` : 
+                `<p class="cooldown">Nächster Angriff in ${formatCooldown(village.lastAttacked)}</p>`
+            : ''
+        }
+        <button onclick="closeVillageInfo()" class="close-btn">Schließen</button>
+    `;
+
+    // Entferne vorhandene Info-Box
+    const existingBox = document.querySelector('.village-info-box');
+    if (existingBox) {
+        existingBox.remove();
+    }
+
+    document.body.appendChild(infoBox);
+}
+
+// Schließe die Dorfinfo
+function closeVillageInfo() {
+    const infoBox = document.querySelector('.village-info-box');
+    if (infoBox) {
+        infoBox.remove();
+    }
+}
+
+// Formatiere die Cooldown-Zeit
+function formatCooldown(lastAttacked) {
+    const timeLeft = 3600000 - (Date.now() - lastAttacked);
+    const minutes = Math.floor(timeLeft / 60000);
+    const seconds = Math.floor((timeLeft % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Kampfsystem
+function calculateBattleResult(attackerArmy, defenderArmy) {
+    // Berechne Gesamtstärke für Angreifer
+    const attackerStrength = 
+        (attackerArmy.spearman * gameState.unitStats.spearman.attack) +
+        (attackerArmy.archer * gameState.unitStats.archer.attack) +
+        (attackerArmy.cavalry * gameState.unitStats.cavalry.attack);
+
+    // Berechne Gesamtstärke für Verteidiger
+    const defenderStrength = 
+        (defenderArmy.spearman * 25) + // Basis-Verteidigungswerte
+        (defenderArmy.archer * 15) +
+        (defenderArmy.cavalry * 20);
+
+    // Füge Zufallsfaktor hinzu (±20%)
+    const randomFactor = 0.8 + Math.random() * 0.4;
+    const attackerFinalStrength = attackerStrength * randomFactor;
+
+    return {
+        victory: attackerFinalStrength > defenderStrength,
+        attackerLosses: Math.floor(defenderStrength / attackerStrength * 0.5 * attackerArmy.total),
+        defenderLosses: Math.floor(attackerStrength / defenderStrength * 0.7 * defenderArmy.total)
+    };
+}
+
+// Greife ein Dorf an
+function attackVillage(villageId) {
+    const targetVillage = gameState.map.villages[villageId];
+    if (!targetVillage) return;
+
+    // Prüfe ob genug Zeit seit dem letzten Angriff vergangen ist
+    if (Date.now() - targetVillage.lastAttacked < 3600000) {
+        alert('Dieses Dorf wurde vor kurzem angegriffen. Warte bis die Abklingzeit vorbei ist.');
+        return;
+    }
+
+    // Berechne Gesamtarmeen
+    const playerArmy = {
+        spearman: gameState.units.spearman,
+        archer: gameState.units.archer,
+        cavalry: gameState.units.cavalry,
+        total: gameState.units.spearman + gameState.units.archer + gameState.units.cavalry
+    };
+
+    const defenderArmy = {
+        spearman: targetVillage.army.spearman,
+        archer: targetVillage.army.archer,
+        cavalry: targetVillage.army.cavalry,
+        total: targetVillage.army.spearman + targetVillage.army.archer + targetVillage.army.cavalry
+    };
+
+    if (playerArmy.total === 0) {
+        alert('Du hast keine Armee zum Angreifen!');
+        return;
+    }
+
+    const battleResult = calculateBattleResult(playerArmy, defenderArmy);
+
+    // Berechne die Verluste proportional für jede Einheit
+    const calculateUnitLosses = (army, totalLosses) => {
+        const total = army.spearman + army.archer + army.cavalry;
+        if (total === 0) return { spearman: 0, archer: 0, cavalry: 0 };
+        
+        return {
+            spearman: Math.min(army.spearman, Math.floor(totalLosses * (army.spearman / total))),
+            archer: Math.min(army.archer, Math.floor(totalLosses * (army.archer / total))),
+            cavalry: Math.min(army.cavalry, Math.floor(totalLosses * (army.cavalry / total)))
+        };
+    };
+
+    // Berechne die Verluste für beide Seiten
+    const attackerLosses = calculateUnitLosses(playerArmy, battleResult.attackerLosses);
+    const defenderLosses = calculateUnitLosses(defenderArmy, battleResult.defenderLosses);
+
+    if (battleResult.victory) {
+        // Berechne Beute (1/3 der Ressourcen)
+        const loot = {
+            wood: Math.floor(targetVillage.resources.wood / 3),
+            clay: Math.floor(targetVillage.resources.clay / 3),
+            iron: Math.floor(targetVillage.resources.iron / 3),
+            crop: Math.floor(targetVillage.resources.crop / 3)
+        };
+
+        // Füge Beute dem Spieler hinzu
+        gameState.wood = Math.min(gameState.warehouse.capacity, gameState.wood + loot.wood);
+        gameState.clay = Math.min(gameState.warehouse.capacity, gameState.clay + loot.clay);
+        gameState.iron = Math.min(gameState.warehouse.capacity, gameState.iron + loot.iron);
+        gameState.crop = Math.min(gameState.warehouse.capacity, gameState.crop + loot.crop);
+
+        // Reduziere Ressourcen des Zieldorfs
+        targetVillage.resources.wood -= loot.wood;
+        targetVillage.resources.clay -= loot.clay;
+        targetVillage.resources.iron -= loot.iron;
+        targetVillage.resources.crop -= loot.crop;
+
+        // Aktualisiere Armeen mit den berechneten Verlusten
+        gameState.units.spearman = Math.max(0, gameState.units.spearman - attackerLosses.spearman);
+        gameState.units.archer = Math.max(0, gameState.units.archer - attackerLosses.archer);
+        gameState.units.cavalry = Math.max(0, gameState.units.cavalry - attackerLosses.cavalry);
+
+        targetVillage.army.spearman = Math.max(0, targetVillage.army.spearman - defenderLosses.spearman);
+        targetVillage.army.archer = Math.max(0, targetVillage.army.archer - defenderLosses.archer);
+        targetVillage.army.cavalry = Math.max(0, targetVillage.army.cavalry - defenderLosses.cavalry);
+
+        const totalAttackerLosses = attackerLosses.spearman + attackerLosses.archer + attackerLosses.cavalry;
+        const totalDefenderLosses = defenderLosses.spearman + defenderLosses.archer + defenderLosses.cavalry;
+
+        alert(`Sieg! Du hast ${loot.wood} Holz, ${loot.clay} Lehm, ${loot.iron} Eisen und ${loot.crop} Getreide erbeutet.\nDeine Verluste: ${totalAttackerLosses} Einheiten\nFeindliche Verluste: ${totalDefenderLosses} Einheiten`);
+    } else {
+        // Bei Niederlage
+        gameState.units.spearman = Math.max(0, gameState.units.spearman - attackerLosses.spearman);
+        gameState.units.archer = Math.max(0, gameState.units.archer - attackerLosses.archer);
+        gameState.units.cavalry = Math.max(0, gameState.units.cavalry - attackerLosses.cavalry);
+
+        const totalAttackerLosses = attackerLosses.spearman + attackerLosses.archer + attackerLosses.cavalry;
+        alert(`Niederlage! Deine Armee wurde zurückgeschlagen.\nDeine Verluste: ${totalAttackerLosses} Einheiten`);
+    }
+
+    // Setze Cooldown
+    targetVillage.lastAttacked = Date.now();
+
+    // Aktualisiere Anzeigen
+    updateDisplay();
+    closeVillageInfo();
+    saveGameState();
 }
 
 // Kartensteuerung
@@ -1087,8 +1433,30 @@ function initGame() {
         gameState.unitStats = JSON.parse(JSON.stringify(baseUnitStats));
         gameState.gameStartTime = Date.now();
         gameState.totalPlayTime = 0;
-        gameState.map.size = 5;
-        gameState.map.tiles = [];
+        gameState.map = {
+            size: 7,
+            centerX: 3,
+            centerY: 3,
+            villages: {
+                player: {
+                    x: 3,
+                    y: 3,
+                    type: 'player',
+                    name: 'Mein Dorf',
+                    resources: {
+                        wood: 100,
+                        clay: 100,
+                        iron: 100,
+                        crop: 100
+                    },
+                    army: {
+                        spearman: 0,
+                        archer: 0,
+                        cavalry: 0
+                    }
+                }
+            }
+        };
         gameState.buildingUpgrades = {
             woodcutter: 0,
             clay_pit: 0,
@@ -1099,13 +1467,28 @@ function initGame() {
             level: 1,
             capacity: 15
         };
+        
+        // Speichere den initialen Zustand
+        saveGameState();
     }
     
     // Aktualisiere alle Anzeigen
     updateDisplay();
-    generateMap();
     
     // Stoppe vorhandene Intervalle
+    clearAllIntervals();
+    
+    // Starte die Intervalle neu
+    startGameIntervals();
+    
+    // Generiere die Karte wenn wir auf der Kartenseite sind
+    if (document.querySelector('.map-grid')) {
+        generateMap();
+    }
+}
+
+// Stoppe alle Intervalle
+function clearAllIntervals() {
     if (window.productionInterval) {
         clearInterval(window.productionInterval);
     }
@@ -1115,15 +1498,31 @@ function initGame() {
     if (window.buttonInterval) {
         clearInterval(window.buttonInterval);
     }
+}
+
+// Starte die Spielintervalle
+function startGameIntervals() {
+    // Ressourcenproduktion
+    window.productionInterval = setInterval(() => {
+        produceResources();
+    }, 1000);
     
-    // Starte die Intervalle
-    window.productionInterval = setInterval(produceResources, 1000);
-    window.timeInterval = setInterval(updatePlayTimeDisplay, 1000);
+    // Spielzeit-Aktualisierung
+    window.timeInterval = setInterval(() => {
+        updatePlayTimeDisplay();
+    }, 1000);
+    
+    // Button-Aktualisierung und Spielstandspeicherung
     window.buttonInterval = setInterval(() => {
         updateUpgradeButtons();
         updateBuildingDisplay();
+        updateDisplay();
+        saveGameState();
     }, 3000);
 }
+
+// Event-Listener für DOMContentLoaded
+document.addEventListener('DOMContentLoaded', initGame);
 
 // Reset-Funktion
 function resetGame() {
@@ -1157,8 +1556,28 @@ function resetGame() {
         gameState.gameStartTime = Date.now();
         gameState.totalPlayTime = 0;
         gameState.map = {
-            size: 5,
-            tiles: []
+            size: 7,
+            centerX: 3,
+            centerY: 3,
+            villages: {
+                player: {
+                    x: 3,
+                    y: 3,
+                    type: 'player',
+                    name: 'Mein Dorf',
+                    resources: {
+                        wood: 100,
+                        clay: 100,
+                        iron: 100,
+                        crop: 100
+                    },
+                    army: {
+                        spearman: 0,
+                        archer: 0,
+                        cavalry: 0
+                    }
+                }
+            }
         };
         gameState.buildingUpgrades = {
             woodcutter: 0,
@@ -1180,7 +1599,4 @@ function resetGame() {
         
         alert('Spiel wurde zurückgesetzt!');
     }
-}
-
-// Initialisiere das Spiel beim Laden
-document.addEventListener('DOMContentLoaded', initGame); 
+} 
