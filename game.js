@@ -1,11 +1,9 @@
 // Spielzustand
 const gameState = {
-    resources: {
-        wood: 100,
-        clay: 100,
-        iron: 100,
-        crop: 100
-    },
+    wood: 100,
+    clay: 100,
+    iron: 100,
+    crop: 100,
     buildings: {
         woodcutter: 0,
         clay_pit: 0,
@@ -65,6 +63,10 @@ const gameState = {
         clay_pit: 0,
         iron_mine: 0,
         farm: 0
+    },
+    warehouse: {
+        level: 1,
+        capacity: 1000
     }
 };
 
@@ -120,7 +122,13 @@ const baseBuildingCosts = {
     woodcutter: { wood: 50, clay: 30, iron: 20 },
     clay_pit: { wood: 40, clay: 50, iron: 20 },
     iron_mine: { wood: 40, clay: 30, iron: 50 },
-    farm: { wood: 40, clay: 30, iron: 20, crop: 20 }
+    farm: { wood: 40, clay: 30, iron: 20, crop: 20 },
+    warehouse: {
+        wood: 200,
+        clay: 250,
+        iron: 100,
+        crop: 50
+    }
 };
 
 // Basis-Forschungskosten für Einheiten
@@ -255,6 +263,25 @@ function getBuildingUpgradeCosts(buildingType) {
     return costs;
 }
 
+// Berechne die Lagerkapazität basierend auf dem Level
+function calculateWarehouseCapacity(level) {
+    return Math.floor(1000 * Math.pow(1.5, level - 1));
+}
+
+// Berechne die Upgrade-Kosten für das Lagerhaus
+function calculateUpgradeCosts(buildingType) {
+    if (buildingType === 'warehouse') {
+        const level = gameState.warehouse.level;
+        return {
+            wood: Math.floor(200 * Math.pow(1.5, level - 1)),
+            clay: Math.floor(250 * Math.pow(1.5, level - 1)),
+            iron: Math.floor(100 * Math.pow(1.5, level - 1)),
+            crop: Math.floor(50 * Math.pow(1.5, level - 1))
+        };
+    }
+    return {};
+}
+
 // Zeige einen bestimmten Abschnitt an
 function showSection(sectionId) {
     // Verstecke alle Abschnitte
@@ -274,16 +301,45 @@ function showSection(sectionId) {
 
 // Aktualisiere die Anzeige der Ressourcen
 function updateResourceDisplay() {
-    for (const [resource, amount] of Object.entries(gameState.resources)) {
-        document.getElementById(resource).textContent = Math.floor(amount);
+    const capacity = calculateWarehouseCapacity(gameState.warehouse.level);
+    gameState.warehouse.capacity = capacity;
+    
+    // Begrenze Ressourcen auf Lagerkapazität
+    for (const resource of ['wood', 'clay', 'iron', 'crop']) {
+        if (gameState[resource] > capacity) {
+            gameState[resource] = capacity;
+        }
+        const element = document.getElementById(resource);
+        if (element) {
+            element.textContent = Math.floor(gameState[resource]);
+            // Füge die rote Farbe hinzu, wenn das Limit erreicht ist
+            if (Math.floor(gameState[resource]) >= capacity) {
+                element.classList.add('resource-full');
+            } else {
+                element.classList.remove('resource-full');
+            }
+        }
     }
+    
+    // Aktualisiere Lagerhaus-Anzeige
+    const warehouseLevelElement = document.getElementById('warehouse-level');
+    const warehouseCapacityElement = document.getElementById('warehouse-capacity');
+    if (warehouseLevelElement) {
+        warehouseLevelElement.textContent = gameState.warehouse.level;
+    }
+    if (warehouseCapacityElement) {
+        warehouseCapacityElement.textContent = capacity;
+    }
+    
+    // Aktualisiere Upgrade-Buttons
+    updateUpgradeButtons();
 }
 
 // Prüfe, ob genügend Ressourcen zum Bauen vorhanden sind
 function canBuild(buildingType) {
     const costs = getBuildingCosts(buildingType);
     for (const [resource, cost] of Object.entries(costs)) {
-        if (gameState.resources[resource] < cost) {
+        if (gameState[resource] < cost) {
             return false;
         }
     }
@@ -304,7 +360,7 @@ function build(buildingType) {
 
     const costs = getBuildingCosts(buildingType);
     for (const [resource, cost] of Object.entries(costs)) {
-        gameState.resources[resource] -= cost;
+        gameState[resource] -= cost;
     }
 
     gameState.buildings[buildingType]++;
@@ -317,7 +373,7 @@ function build(buildingType) {
 function canResearch(researchType) {
     const costs = getResearchCosts(researchType);
     for (const [resource, cost] of Object.entries(costs)) {
-        if (gameState.resources[resource] < cost) {
+        if (gameState[resource] < cost) {
             return false;
         }
     }
@@ -333,7 +389,7 @@ function research(researchType) {
 
     const costs = getResearchCosts(researchType);
     for (const [resource, cost] of Object.entries(costs)) {
-        gameState.resources[resource] -= cost;
+        gameState[resource] -= cost;
     }
 
     gameState.research[researchType]++;
@@ -679,19 +735,20 @@ function calculateProductionRate(resource) {
 
 // Produziere Ressourcen basierend auf Gebäuden und Forschung
 function produceResources() {
-    const resourcesPerSecond = {
-        wood: calculateProductionRate('wood') / 30, // Teilen durch 30 für die Produktion pro Sekunde
-        clay: calculateProductionRate('clay') / 30,
-        iron: calculateProductionRate('iron') / 30,
-        crop: calculateProductionRate('crop') / 30
-    };
-
-    // Füge die Ressourcen hinzu
-    for (const [resource, rate] of Object.entries(resourcesPerSecond)) {
-        gameState.resources[resource] += rate;
+    const capacity = calculateWarehouseCapacity(gameState.warehouse.level);
+    
+    for (const resource of ['wood', 'clay', 'iron', 'crop']) {
+        const production = calculateProductionRate(resource);
+        // Füge nur Ressourcen hinzu, wenn noch Platz im Lager ist
+        if (gameState[resource] < capacity) {
+            gameState[resource] = Math.min(
+                capacity,
+                gameState[resource] + (production / 60)
+            );
+        }
     }
-
-    updateDisplay();
+    
+    updateResourceDisplay();
     saveGameState();
 }
 
@@ -743,7 +800,7 @@ function centerMap() {
 function canTrainUnit(unitType) {
     const costs = unitCosts[unitType];
     for (const [resource, cost] of Object.entries(costs)) {
-        if (gameState.resources[resource] < cost) {
+        if (gameState[resource] < cost) {
             return false;
         }
     }
@@ -759,7 +816,7 @@ function trainUnit(unitType) {
 
     const costs = unitCosts[unitType];
     for (const [resource, cost] of Object.entries(costs)) {
-        gameState.resources[resource] -= cost;
+        gameState[resource] -= cost;
     }
 
     gameState.units[unitType]++;
@@ -771,7 +828,7 @@ function trainUnit(unitType) {
 // Prüfe, ob eine Einheit verbessert werden kann
 function canUpgradeUnit(unitType) {
     const costs = getUpgradeCosts(unitType);
-    return Object.entries(costs).every(([resource, cost]) => gameState.resources[resource] >= cost);
+    return Object.entries(costs).every(([resource, cost]) => gameState[resource] >= cost);
 }
 
 // Verbessere eine Einheit
@@ -780,7 +837,7 @@ function upgradeUnit(unitType) {
     
     // Prüfe, ob genügend Ressourcen vorhanden sind
     for (const [resource, cost] of Object.entries(costs)) {
-        if (gameState.resources[resource] < cost) {
+        if (gameState[resource] < cost) {
             alert('Nicht genügend Ressourcen!');
             return;
         }
@@ -788,7 +845,7 @@ function upgradeUnit(unitType) {
     
     // Ziehe Ressourcen ab
     for (const [resource, cost] of Object.entries(costs)) {
-        gameState.resources[resource] -= cost;
+        gameState[resource] -= cost;
     }
     
     // Verbessere die Einheitenstats
@@ -817,7 +874,7 @@ function upgradeUnit(unitType) {
 function canUpgradeBuilding(buildingType) {
     const costs = getBuildingUpgradeCosts(buildingType);
     for (const [resource, cost] of Object.entries(costs)) {
-        if (gameState.resources[resource] < cost) {
+        if (gameState[resource] < cost) {
             return false;
         }
     }
@@ -826,7 +883,28 @@ function canUpgradeBuilding(buildingType) {
 
 // Verbessere ein Gebäude
 function upgradeBuilding(buildingType) {
-    // Prüfe maximales Verbesserungslevel
+    if (buildingType === 'warehouse') {
+        const costs = calculateUpgradeCosts('warehouse');
+        // Prüfe, ob genügend Ressourcen vorhanden sind
+        for (const [resource, cost] of Object.entries(costs)) {
+            if (gameState[resource] < cost) {
+                alert('Nicht genügend Ressourcen!');
+                return;
+            }
+        }
+        // Ziehe Ressourcen ab
+        for (const [resource, cost] of Object.entries(costs)) {
+            gameState[resource] -= cost;
+        }
+        // Erhöhe Level
+        gameState.warehouse.level++;
+        gameState.warehouse.capacity = calculateWarehouseCapacity(gameState.warehouse.level);
+        updateDisplay();
+        saveGameState();
+        return;
+    }
+    
+    // Bestehende Logik für andere Gebäude
     if (gameState.buildingUpgrades[buildingType] >= MAX_BUILDING_UPGRADE_LEVEL) {
         alert('Maximales Verbesserungslevel erreicht (25%)!');
         return;
@@ -839,7 +917,7 @@ function upgradeBuilding(buildingType) {
 
     const costs = getBuildingUpgradeCosts(buildingType);
     for (const [resource, cost] of Object.entries(costs)) {
-        gameState.resources[resource] -= cost;
+        gameState[resource] -= cost;
     }
 
     gameState.buildingUpgrades[buildingType]++;
@@ -847,44 +925,35 @@ function upgradeBuilding(buildingType) {
     saveGameState();
 }
 
+// Erweitere die updateUpgradeButtons Funktion
+function updateUpgradeButtons() {
+    // Lagerhaus-Upgrade-Button
+    const warehouseCosts = calculateUpgradeCosts('warehouse');
+    const warehouseBtn = document.getElementById('warehouse-upgrade');
+    if (warehouseBtn) {
+        warehouseBtn.textContent = `Verbessern (${Object.entries(warehouseCosts)
+            .map(([resource, cost]) => `${cost} ${resource}`)
+            .join(', ')})`;
+        
+        const canUpgradeWarehouse = Object.entries(warehouseCosts)
+            .every(([resource, cost]) => gameState[resource] >= cost);
+        
+        warehouseBtn.disabled = !canUpgradeWarehouse;
+    }
+}
+
 // Initialisiere das Spiel
 function initGame() {
     const loaded = loadGameState();
-    if (loaded) {
-        console.log('Gespeicherter Spielzustand geladen');
-        // Stelle sicher, dass neue Eigenschaften initialisiert werden
-        if (!gameState.units) {
-            gameState.units = {
-                spearman: 0,
-                archer: 0,
-                cavalry: 0
-            };
-        }
-        if (!gameState.unitStats) {
-            gameState.unitStats = JSON.parse(JSON.stringify(baseUnitStats));
-        }
-        if (!gameState.gameStartTime) {
-            gameState.gameStartTime = Date.now();
-        }
-        if (!gameState.totalPlayTime) {
-            gameState.totalPlayTime = 0;
-        }
-        if (!gameState.buildingUpgrades) {
-            gameState.buildingUpgrades = {
-                woodcutter: 0,
-                clay_pit: 0,
-                iron_mine: 0,
-                farm: 0
-            };
-        }
-    } else {
-        console.log('Neues Spiel gestartet');
+    if (!loaded) {
         // Setze Standardwerte
-        gameState.resources = {
-            wood: 100,
-            clay: 100,
-            iron: 100,
-            crop: 100
+        gameState.wood = 100;
+        gameState.clay = 100;
+        gameState.iron = 100;
+        gameState.crop = 100;
+        gameState.warehouse = {
+            level: 1,
+            capacity: 1000
         };
         gameState.buildings = {
             woodcutter: 0,
@@ -940,12 +1009,10 @@ function resetGame() {
         localStorage.removeItem('gameState');
         
         // Setze den Spielzustand zurück
-        gameState.resources = {
-            wood: 100,
-            clay: 100,
-            iron: 100,
-            crop: 100
-        };
+        gameState.wood = 100;
+        gameState.clay = 100;
+        gameState.iron = 100;
+        gameState.crop = 100;
         gameState.buildings = {
             woodcutter: 0,
             clay_pit: 0,

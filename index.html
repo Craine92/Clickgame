@@ -115,6 +115,15 @@
                     Verbessern (+5% Produktion) (<span id="farm-upgrade-cost">100</span> Getreide)
                 </button>
             </div>
+
+            <div class="building-tile" data-building="warehouse">
+                <h3>Lagerhaus</h3>
+                <div class="building-icon">🏗️</div>
+                <p>Speichert Ressourcen</p>
+                <p>Level: <span id="warehouse-level">1</span></p>
+                <p>Kapazität: <span id="warehouse-capacity">1000</span></p>
+                <button onclick="upgradeBuilding('warehouse')" class="upgrade-btn" id="warehouse-upgrade">Verbessern</button>
+            </div>
         </div>
 
         <button class="reset-button" onclick="resetGame()">Spiel zurücksetzen</button>

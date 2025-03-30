@@ -194,7 +194,7 @@ nav::-webkit-scrollbar {
 }
 
 .resource span {
-    font-weight: bold;
+    color: #3498db;
 }
 
 .resource-icon {
@@ -721,4 +721,34 @@ button:disabled {
 .building-icon {
     font-size: 2em;
     margin: 10px 0;
+}
+
+/* Lagerhaus-spezifische Styles */
+#warehouse {
+    background-color: #34495e;
+    border: 1px solid #2c3e50;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+#warehouse h3 {
+    color: #3498db;
+    margin-bottom: 10px;
+}
+
+#warehouse p {
+    margin: 5px 0;
+    color: #ecf0f1;
+}
+
+/* Ressourcenanzeige bei voller Kapazität */
+.resource-full {
+    color: #e74c3c !important;
+}
+
+/* Kapazitätsanzeige */
+.capacity-info {
+    font-size: 0.9em;
+    color: #95a5a6;
+    margin-top: 5px;
 } 
