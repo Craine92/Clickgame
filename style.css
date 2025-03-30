@@ -119,13 +119,37 @@ nav::-webkit-scrollbar {
 /* Einheitenanzeige */
 .units-display {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    gap: 20px;
+    color: #3498db;
+    align-items: center;
 }
 
-.units-display span {
-    color: #4299e1;
-    white-space: nowrap;
+.unit-count {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.army-stats {
+    display: flex;
+    gap: 15px;
+    padding-left: 15px;
+    border-left: 2px solid #4a5568;
+}
+
+.army-stats .stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.army-stats .stat-icon {
+    font-size: 1.1em;
+}
+
+.army-stats span:last-child {
+    color: #2ecc71;
+    font-weight: bold;
 }
 
 @media (max-width: 480px) {

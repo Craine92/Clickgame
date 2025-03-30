@@ -494,6 +494,14 @@ function updateUnitDisplay() {
         crop: 'Getreide'
     };
 
+    // Aktualisiere Einheitenzähler
+    document.getElementById('spearman-count').textContent = gameState.units.spearman;
+    document.getElementById('archer-count').textContent = gameState.units.archer;
+    document.getElementById('cavalry-count').textContent = gameState.units.cavalry;
+
+    // Berechne und aktualisiere Armeestärke
+    updateArmyStats();
+
     // Aktualisiere die Einheiten in der Kaserne
     for (const [unit, count] of Object.entries(gameState.units)) {
         const unitElement = document.querySelector(`[data-unit="${unit}"]`);
@@ -538,6 +546,26 @@ function updateUnitDisplay() {
             }
         }
     }
+}
+
+// Berechne und aktualisiere die Armeestärke
+function updateArmyStats() {
+    let totalHealth = 0;
+    let totalAttack = 0;
+    let totalDefense = 0;
+
+    // Berechne Gesamtstärke für jede Einheit
+    for (const [unit, count] of Object.entries(gameState.units)) {
+        const stats = gameState.unitStats[unit];
+        totalHealth += stats.health * count;
+        totalAttack += stats.attack * count;
+        totalDefense += stats.defense * count;
+    }
+
+    // Aktualisiere die Anzeige
+    document.getElementById('total-health').textContent = totalHealth;
+    document.getElementById('total-attack').textContent = totalAttack;
+    document.getElementById('total-defense').textContent = totalDefense;
 }
 
 // Formatiere die Spielzeit in Stunden:Minuten:Sekunden
