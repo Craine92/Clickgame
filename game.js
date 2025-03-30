@@ -67,6 +67,10 @@ const gameState = {
     warehouse: {
         level: 1,
         capacity: 1000
+    },
+    fortress: {
+        level: 1,
+        capacity: 15
     }
 };
 
@@ -128,6 +132,12 @@ const baseBuildingCosts = {
         clay: 250,
         iron: 100,
         crop: 50
+    },
+    fortress: {
+        wood: 300,
+        clay: 400,
+        iron: 200,
+        crop: 100
     }
 };
 
@@ -280,6 +290,22 @@ function calculateUpgradeCosts(buildingType) {
         };
     }
     return {};
+}
+
+// Berechne die Armeekapazität basierend auf dem Festungslevel
+function calculateArmyCapacity(level) {
+    return Math.floor(15 * Math.pow(1.5, level - 1));
+}
+
+// Berechne die Upgrade-Kosten für die Festung
+function calculateFortressUpgradeCosts() {
+    const level = gameState.fortress.level;
+    return {
+        wood: Math.floor(300 * Math.pow(1.5, level - 1)),
+        clay: Math.floor(400 * Math.pow(1.5, level - 1)),
+        iron: Math.floor(200 * Math.pow(1.5, level - 1)),
+        crop: Math.floor(100 * Math.pow(1.5, level - 1))
+    };
 }
 
 // Zeige einen bestimmten Abschnitt an
@@ -686,6 +712,16 @@ function updateDisplay() {
     if (archerCount) archerCount.textContent = gameState.units.archer;
     if (cavalryCount) cavalryCount.textContent = gameState.units.cavalry;
 
+    // Aktualisiere Festungsanzeige
+    const fortressLevelElement = document.getElementById('fortress-level');
+    const fortressCapacityElement = document.getElementById('fortress-capacity');
+    if (fortressLevelElement) {
+        fortressLevelElement.textContent = gameState.fortress.level;
+    }
+    if (fortressCapacityElement) {
+        fortressCapacityElement.textContent = calculateArmyCapacity(gameState.fortress.level);
+    }
+
     // Aktualisiere andere Anzeigen
     updateBuildingDisplay();
     updateResearchDisplay();
@@ -801,18 +837,32 @@ function centerMap() {
 // Prüfe, ob genügend Ressourcen für eine Einheit vorhanden sind
 function canTrainUnit(unitType) {
     const costs = unitCosts[unitType];
+    // Prüfe Ressourcen
     for (const [resource, cost] of Object.entries(costs)) {
         if (gameState[resource] < cost) {
             return false;
         }
     }
-    return true;
+    
+    // Prüfe Armeekapazität
+    const currentArmySize = gameState.units.spearman + gameState.units.archer + gameState.units.cavalry;
+    const maxCapacity = calculateArmyCapacity(gameState.fortress.level);
+    
+    return currentArmySize < maxCapacity;
 }
 
 // Trainiere eine neue Einheit
 function trainUnit(unitType) {
+    const currentArmySize = gameState.units.spearman + gameState.units.archer + gameState.units.cavalry;
+    const maxCapacity = calculateArmyCapacity(gameState.fortress.level);
+    
+    if (currentArmySize >= maxCapacity) {
+        alert('Maximale Armeekapazität erreicht! Verbessere deine Festung für mehr Einheiten.');
+        return;
+    }
+
     if (!canTrainUnit(unitType)) {
-        alert('Nicht genügend Ressourcen!');
+        alert('Nicht genügend Ressourcen oder Armeekapazität erreicht!');
         return;
     }
 
@@ -906,6 +956,27 @@ function upgradeBuilding(buildingType) {
         return;
     }
     
+    if (buildingType === 'fortress') {
+        const costs = calculateFortressUpgradeCosts();
+        // Prüfe, ob genügend Ressourcen vorhanden sind
+        for (const [resource, cost] of Object.entries(costs)) {
+            if (gameState[resource] < cost) {
+                alert('Nicht genügend Ressourcen!');
+                return;
+            }
+        }
+        // Ziehe Ressourcen ab
+        for (const [resource, cost] of Object.entries(costs)) {
+            gameState[resource] -= cost;
+        }
+        // Erhöhe Level
+        gameState.fortress.level++;
+        gameState.fortress.capacity = calculateArmyCapacity(gameState.fortress.level);
+        updateDisplay();
+        saveGameState();
+        return;
+    }
+    
     // Bestehende Logik für andere Gebäude
     if (gameState.buildingUpgrades[buildingType] >= MAX_BUILDING_UPGRADE_LEVEL) {
         alert('Maximales Verbesserungslevel erreicht (25%)!');
@@ -929,12 +1000,20 @@ function upgradeBuilding(buildingType) {
 
 // Erweitere die updateUpgradeButtons Funktion
 function updateUpgradeButtons() {
+    // Ressourcennamen auf Deutsch
+    const resourceNames = {
+        wood: 'Holz',
+        clay: 'Lehm',
+        iron: 'Eisen',
+        crop: 'Getreide'
+    };
+
     // Lagerhaus-Upgrade-Button
     const warehouseCosts = calculateUpgradeCosts('warehouse');
     const warehouseBtn = document.getElementById('warehouse-upgrade');
     if (warehouseBtn) {
         const costText = Object.entries(warehouseCosts)
-            .map(([resource, cost]) => `${cost} ${resource}`)
+            .map(([resource, cost]) => `${cost} ${resourceNames[resource]}`)
             .join(', ');
         
         warehouseBtn.textContent = `Verbessern (${costText})`;
@@ -943,11 +1022,34 @@ function updateUpgradeButtons() {
             .every(([resource, cost]) => gameState[resource] >= cost);
         
         warehouseBtn.disabled = !canUpgradeWarehouse;
-        // Entferne die deaktivierte Klasse wenn genügend Ressourcen vorhanden sind
         if (canUpgradeWarehouse) {
             warehouseBtn.classList.remove('disabled');
         } else {
             warehouseBtn.classList.add('disabled');
+        }
+    }
+
+    // Festung-Upgrade-Button
+    const fortressCosts = calculateFortressUpgradeCosts();
+    const fortressBtn = document.getElementById('fortress-upgrade');
+    if (fortressBtn) {
+        const costText = Object.entries(fortressCosts)
+            .map(([resource, cost]) => `${cost} ${resourceNames[resource]}`)
+            .join(', ');
+        
+        const currentCapacity = calculateArmyCapacity(gameState.fortress.level);
+        const nextCapacity = calculateArmyCapacity(gameState.fortress.level + 1);
+        
+        fortressBtn.textContent = `Verbessern (${currentCapacity} → ${nextCapacity} Einheiten) (${costText})`;
+        
+        const canUpgradeFortress = Object.entries(fortressCosts)
+            .every(([resource, cost]) => gameState[resource] >= cost);
+        
+        fortressBtn.disabled = !canUpgradeFortress;
+        if (canUpgradeFortress) {
+            fortressBtn.classList.remove('disabled');
+        } else {
+            fortressBtn.classList.add('disabled');
         }
     }
 }
@@ -992,6 +1094,10 @@ function initGame() {
             clay_pit: 0,
             iron_mine: 0,
             farm: 0
+        };
+        gameState.fortress = {
+            level: 1,
+            capacity: 15
         };
     }
     
@@ -1059,6 +1165,10 @@ function resetGame() {
             clay_pit: 0,
             iron_mine: 0,
             farm: 0
+        };
+        gameState.fortress = {
+            level: 1,
+            capacity: 15
         };
         
         // Speichere den zurückgesetzten Zustand
