@@ -983,6 +983,54 @@ function showVillageInfo(villageId) {
     const totalArmy = village.army.spearman + village.army.archer + village.army.cavalry;
     const canAttack = villageId !== 'player' && Date.now() - (village.lastAttacked || 0) >= 3600000; // 1 Stunde Cooldown
 
+    // Berechne die Gesamtstärke der Armee
+    const calculateArmyStrength = (army) => {
+        let totalHealth = 0;
+        let totalAttack = 0;
+        let totalDefense = 0;
+
+        // Für das Spielerdorf
+        if (villageId === 'player') {
+            totalHealth += army.spearman * gameState.unitStats.spearman.health;
+            totalHealth += army.archer * gameState.unitStats.archer.health;
+            totalHealth += army.cavalry * gameState.unitStats.cavalry.health;
+            
+            totalAttack += army.spearman * gameState.unitStats.spearman.attack;
+            totalAttack += army.archer * gameState.unitStats.archer.attack;
+            totalAttack += army.cavalry * gameState.unitStats.cavalry.attack;
+            
+            totalDefense += army.spearman * gameState.unitStats.spearman.defense;
+            totalDefense += army.archer * gameState.unitStats.archer.defense;
+            totalDefense += army.cavalry * gameState.unitStats.cavalry.defense;
+        } 
+        // Für andere Dörfer (Basiswerte)
+        else {
+            totalHealth += army.spearman * 60;
+            totalHealth += army.archer * 40;
+            totalHealth += army.cavalry * 70;
+            
+            totalAttack += army.spearman * 25;
+            totalAttack += army.archer * 15;
+            totalAttack += army.cavalry * 20;
+            
+            totalDefense += army.spearman * 20;
+            totalDefense += army.archer * 5;
+            totalDefense += army.cavalry * 10;
+        }
+
+        return { health: totalHealth, attack: totalAttack, defense: totalDefense };
+    };
+
+    const armyStrength = calculateArmyStrength(village.army);
+
+    // Berechne mögliche Beute (1/3 der Ressourcen)
+    const potentialLoot = {
+        wood: Math.floor(village.resources.wood / 3),
+        clay: Math.floor(village.resources.clay / 3),
+        iron: Math.floor(village.resources.iron / 3),
+        crop: Math.floor(village.resources.crop / 3)
+    };
+
     infoBox.innerHTML = `
         <h3>${village.name}</h3>
         <p>Status: ${village.type === 'player' ? 'Eigenes Dorf' : village.type === 'neutral' ? 'Neutral' : 'Feindlich'}</p>
@@ -994,6 +1042,15 @@ function showVillageInfo(villageId) {
                 <li>⛏️ Eisen: ${village.resources.iron}</li>
                 <li>🌾 Getreide: ${village.resources.crop}</li>
             </ul>
+            ${villageId !== 'player' ? `
+                <p>Mögliche Beute:</p>
+                <ul class="potential-loot">
+                    <li>🌳 Holz: ${potentialLoot.wood}</li>
+                    <li>🏺 Lehm: ${potentialLoot.clay}</li>
+                    <li>⛏️ Eisen: ${potentialLoot.iron}</li>
+                    <li>🌾 Getreide: ${potentialLoot.crop}</li>
+                </ul>
+            ` : ''}
         </div>
         <div class="village-army">
             <p>Armee (${totalArmy} Einheiten):</p>
@@ -1002,6 +1059,14 @@ function showVillageInfo(villageId) {
                 <li>🏹 Bogenschützen: ${village.army.archer}</li>
                 <li>🐎 Kavallerie: ${village.army.cavalry}</li>
             </ul>
+            <div class="army-strength">
+                <p>Armeestärke:</p>
+                <ul>
+                    <li>❤️ Gesundheit: ${armyStrength.health}</li>
+                    <li>⚔️ Angriff: ${armyStrength.attack}</li>
+                    <li>🛡️ Verteidigung: ${armyStrength.defense}</li>
+                </ul>
+            </div>
         </div>
         ${villageId !== 'player' ? 
             canAttack ? 

@@ -561,11 +561,11 @@ h1 {
     background-color: #2d3748;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    z-index: 1000;
     color: #e2e8f0;
+    z-index: 1000;
     max-width: 400px;
     width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .village-info-box h3 {
@@ -576,45 +576,90 @@ h1 {
 
 .village-info-box p {
     margin: 10px 0;
+    color: #a0aec0;
 }
 
 .village-info-box ul {
     list-style: none;
     padding: 0;
-    margin: 10px 0;
+    margin: 5px 0;
 }
 
 .village-info-box li {
     margin: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.village-info-box button {
-    width: 100%;
-    padding: 10px;
+.potential-loot {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #4a5568;
+}
+
+.potential-loot li {
+    color: #48bb78;
+}
+
+.army-strength {
     margin-top: 15px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    transition: all 0.3s ease;
+    padding-top: 15px;
+    border-top: 1px solid #4a5568;
 }
 
-.village-info-box .attack-btn {
+.army-strength p {
+    color: #4299e1;
+    font-weight: bold;
+}
+
+.army-strength ul {
+    margin-top: 5px;
+}
+
+.army-strength li {
+    color: #e2e8f0;
+}
+
+.attack-btn {
     background-color: #e53e3e;
     color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
 }
 
-.village-info-box .attack-btn:hover {
+.attack-btn:hover {
     background-color: #c53030;
 }
 
-.village-info-box .close-btn {
+.close-btn {
     background-color: #4a5568;
     color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
 }
 
-.village-info-box .close-btn:hover {
+.close-btn:hover {
     background-color: #2d3748;
+}
+
+.cooldown {
+    color: #e53e3e;
+    text-align: center;
+    margin-top: 15px;
+    font-weight: bold;
 }
 
 /* Allgemeine Textformatierung */
