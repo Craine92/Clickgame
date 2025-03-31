@@ -1007,4 +1007,123 @@ button.disabled {
 
 .upgrade-btn:not(:disabled):hover {
     background-color: #2980b9;
+}
+
+.quests-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.quests-container h1 {
+    color: #4299e1;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.quests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.quest-card {
+    background-color: #2c3e50;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+}
+
+.quest-card:hover {
+    transform: translateY(-5px);
+}
+
+.quest-card h3 {
+    color: #ecf0f1;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.quest-description {
+    color: #bdc3c7;
+    margin: 10px 0;
+    font-size: 0.9em;
+}
+
+.quest-progress {
+    margin: 15px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #34495e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress {
+    height: 100%;
+    background-color: #27ae60;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    color: #ecf0f1;
+    font-size: 0.9em;
+}
+
+.quest-reward {
+    background-color: #34495e;
+    border-radius: 6px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.quest-reward p {
+    color: #ecf0f1;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.quest-reward ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.quest-reward li {
+    color: #ffd700;
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+}
+
+.quest-reward li span {
+    margin-right: 8px;
+}
+
+.collect-reward-btn {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+
+.collect-reward-btn:hover {
+    background-color: #219a52;
+}
+
+.collect-reward-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
 } 

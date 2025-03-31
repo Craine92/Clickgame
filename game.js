@@ -91,6 +91,32 @@ const gameState = {
     fortress: {
         level: 1,
         capacity: 15
+    },
+    quests: {
+        neutralAttacks: 0,
+        enemyAttacks: 0,
+        knightsTrained: 0,
+        archersTrained: 0,
+        cavalryTrained: 0,
+        warehouseLevel: 0,
+        fortressLevel: 0,
+        productionLevel: 0,
+        neutralTarget: 5,
+        enemyTarget: 10,
+        knightsTarget: 10,
+        archersTarget: 20,
+        cavalryTarget: 30,
+        warehouseTarget: 3,
+        fortressTarget: 3,
+        productionTarget: 3,
+        neutralCompleted: false,
+        enemyCompleted: false,
+        knightsCompleted: false,
+        archersCompleted: false,
+        cavalryCompleted: false,
+        warehouseCompleted: false,
+        fortressCompleted: false,
+        productionCompleted: false
     }
 };
 
@@ -832,9 +858,11 @@ function produceResources() {
         const production = calculateProductionRate(resource);
         // Füge nur Ressourcen hinzu, wenn noch Platz im Lager ist
         if (gameState[resource] < capacity) {
+            const oldAmount = gameState[resource];
+            // Teile durch 30 statt 60, da die Produktionsrate für 30 Sekunden berechnet wird
             gameState[resource] = Math.min(
                 capacity,
-                gameState[resource] + (production / 60)
+                gameState[resource] + (production / 30)
             );
         }
     }
@@ -1128,8 +1156,8 @@ function calculateBattleResult(attackerArmy, defenderArmy) {
 }
 
 // Greife ein Dorf an
-function attackVillage(villageId) {
-    const targetVillage = gameState.map.villages[villageId];
+function attackVillage(targetVillageId) {
+    const targetVillage = gameState.map.villages[targetVillageId];
     if (!targetVillage) return;
 
     // Prüfe ob genug Zeit seit dem letzten Angriff vergangen ist
@@ -1210,6 +1238,15 @@ function attackVillage(villageId) {
         const totalDefenderLosses = defenderLosses.spearman + defenderLosses.archer + defenderLosses.cavalry;
 
         alert(`Sieg! Du hast ${loot.wood} Holz, ${loot.clay} Lehm, ${loot.iron} Eisen und ${loot.crop} Getreide erbeutet.\nDeine Verluste: ${totalAttackerLosses} Einheiten\nFeindliche Verluste: ${totalDefenderLosses} Einheiten`);
+
+        // Aktualisiere Quest-Fortschritt
+        if (targetVillage.type === 'neutral') {
+            gameState.quests.neutralAttacks++;
+        } else if (targetVillage.type === 'enemy') {
+            gameState.quests.enemyAttacks++;
+        }
+        updateQuestProgress();
+        checkQuestCompletion();
     } else {
         // Bei Niederlage
         gameState.units.spearman = Math.max(0, gameState.units.spearman - attackerLosses.spearman);
@@ -1286,6 +1323,18 @@ function trainUnit(unitType) {
     updateResourceDisplay();
     updateUnitDisplay();
     saveGameState();
+
+    // Aktualisiere Quest-Fortschritt
+    if (unitType === 'spearman') {
+        gameState.quests.knightsTrained++;
+    } else if (unitType === 'archer') {
+        gameState.quests.archersTrained++;
+    } else if (unitType === 'cavalry') {
+        gameState.quests.cavalryTrained++;
+    }
+    
+    updateQuestProgress();
+    checkQuestCompletion();
 }
 
 // Prüfe, ob eine Einheit verbessert werden kann
@@ -1465,6 +1514,156 @@ function updateUpgradeButtons() {
     }
 }
 
+// Quest-Tracking
+function updateQuestProgress() {
+    if (!gameState.quests) {
+        gameState.quests = {
+            neutralAttacks: 0,
+            enemyAttacks: 0,
+            knightsTrained: 0,
+            archersTrained: 0,
+            cavalryTrained: 0,
+            warehouseLevel: 0,
+            fortressLevel: 0,
+            productionLevel: 0,
+            neutralTarget: 5,
+            enemyTarget: 10,
+            knightsTarget: 10,
+            archersTarget: 20,
+            cavalryTarget: 30,
+            warehouseTarget: 3,
+            fortressTarget: 3,
+            productionTarget: 3,
+            neutralCompleted: false,
+            enemyCompleted: false,
+            knightsCompleted: false,
+            archersCompleted: false,
+            cavalryCompleted: false,
+            warehouseCompleted: false,
+            fortressCompleted: false,
+            productionCompleted: false
+        };
+    }
+
+    // Aktualisiere Fortschrittsbalken
+    updateQuestProgressBar('neutral', gameState.quests.neutralAttacks, gameState.quests.neutralTarget);
+    updateQuestProgressBar('enemy', gameState.quests.enemyAttacks, gameState.quests.enemyTarget);
+    updateQuestProgressBar('knights', gameState.quests.knightsTrained, gameState.quests.knightsTarget);
+    updateQuestProgressBar('archers', gameState.quests.archersTrained, gameState.quests.archersTarget);
+    updateQuestProgressBar('cavalry', gameState.quests.cavalryTrained, gameState.quests.cavalryTarget);
+    updateQuestProgressBar('warehouse', gameState.warehouse.level, gameState.quests.warehouseTarget);
+    updateQuestProgressBar('fortress', gameState.fortress.level, gameState.quests.fortressTarget);
+    
+    // Berechne den minimalen Level aller Produktionsgebäude
+    const minProductionLevel = Math.min(
+        gameState.buildings.woodcutter,
+        gameState.buildings.clay_pit,
+        gameState.buildings.iron_mine,
+        gameState.buildings.farm
+    );
+    updateQuestProgressBar('production', minProductionLevel, gameState.quests.productionTarget);
+}
+
+function updateQuestProgressBar(questType, current, target) {
+    const progress = document.getElementById(`${questType}-progress`);
+    const text = document.querySelector(`#quest-${questType} .progress-text`);
+    const button = document.querySelector(`#quest-${questType} .collect-reward-btn`);
+    
+    if (progress && text) {
+        const percentage = (current / target) * 100;
+        progress.style.width = `${Math.min(percentage, 100)}%`;
+        text.textContent = `${current}/${target}`;
+        
+        if (button) {
+            button.style.display = current >= target && !gameState.quests[questType + 'Completed'] ? 'block' : 'none';
+        }
+    }
+}
+
+function collectReward(questType) {
+    const rewards = {
+        neutral: { units: { spearman: 10 } },
+        enemy: { units: { archer: 15 } },
+        knights: { resources: { wood: 1000, clay: 1000, crop: 1000 } },
+        archers: { units: { cavalry: 10 } },
+        cavalry: { units: { spearman: 15 } },
+        warehouse: { units: { archer: 20 } },
+        fortress: { units: { cavalry: 15 } },
+        production: { units: { spearman: 20 } }
+    };
+
+    const reward = rewards[questType];
+    if (!reward) return;
+
+    // Füge Ressourcen hinzu
+    if (reward.resources) {
+        const capacity = calculateWarehouseCapacity(gameState.warehouse.level);
+        for (const [resource, amount] of Object.entries(reward.resources)) {
+            gameState[resource] = Math.min(capacity, gameState[resource] + amount);
+        }
+    }
+
+    // Füge Einheiten hinzu
+    if (reward.units) {
+        for (const [unit, amount] of Object.entries(reward.units)) {
+            gameState.units[unit] += amount;
+        }
+    }
+
+    // Markiere Quest als abgeschlossen und setze neues Ziel
+    gameState.quests[questType + 'Completed'] = true;
+    
+    // Verdoppele das Ziel für die nächste Stufe
+    if (questType === 'warehouse' || questType === 'fortress' || questType === 'production') {
+        gameState.quests[questType + 'Target'] += 2; // Erhöhe um 2 Stufen
+    } else {
+        gameState.quests[questType + 'Target'] *= 2;
+    }
+
+    // Setze den Fortschritt zurück
+    if (questType === 'knights' || questType === 'archers' || questType === 'cavalry') {
+        gameState.quests[questType + 'Trained'] = 0;
+    }
+
+    // Aktualisiere die Anzeige
+    updateQuestProgress();
+    updateResourceDisplay();
+    updateUnitDisplay();
+    saveGameState();
+
+    // Zeige Erfolgsmeldung
+    let message = `Belohnung abgeholt!\n\nErhalten:\n`;
+    if (reward.resources) {
+        for (const [resource, amount] of Object.entries(reward.resources)) {
+            const icon = resource === 'wood' ? '🌳' : resource === 'clay' ? '⛰️' : '🌾';
+            message += `${icon} ${amount} ${resource}\n`;
+        }
+    }
+    if (reward.units) {
+        for (const [unit, amount] of Object.entries(reward.units)) {
+            const icon = unit === 'spearman' ? '⚔️' : unit === 'archer' ? '🏹' : '🐎';
+            message += `${icon} ${amount} ${unit === 'spearman' ? 'Ritter' : unit === 'archer' ? 'Bogenschützen' : 'Kavallerie'}\n`;
+        }
+    }
+    
+    message += `\nNeue Aufgabe: ${gameState.quests[questType + 'Target']} ${getQuestDescription(questType)}`;
+    alert(message);
+}
+
+function getQuestDescription(questType) {
+    const descriptions = {
+        neutral: 'neutrale Dörfer angreifen',
+        enemy: 'feindliche Dörfer angreifen',
+        knights: 'Ritter ausbilden',
+        archers: 'Bogenschützen ausbilden',
+        cavalry: 'Kavallerie ausbilden',
+        warehouse: 'Lagerhausstufe erreichen',
+        fortress: 'Festungsstufe erreichen',
+        production: 'Produktionsgebäudestufe erreichen'
+    };
+    return descriptions[questType] || '';
+}
+
 // Initialisiere das Spiel
 function initGame() {
     const loaded = loadGameState();
@@ -1550,6 +1749,9 @@ function initGame() {
     if (document.querySelector('.map-grid')) {
         generateMap();
     }
+
+    // Initialisiere Quest-Fortschritt
+    updateQuestProgress();
 }
 
 // Stoppe alle Intervalle
@@ -1655,12 +1857,49 @@ function resetGame() {
             capacity: 15
         };
         
+        // Setze das Lagerhaus zurück
+        gameState.warehouse = {
+            level: 1,
+            capacity: calculateWarehouseCapacity(1)
+        };
+        
+        // Setze die Quests zurück
+        gameState.quests = {
+            neutralAttacks: 0,
+            enemyAttacks: 0,
+            knightsTrained: 0,
+            archersTrained: 0,
+            cavalryTrained: 0,
+            warehouseLevel: 0,
+            fortressLevel: 0,
+            productionLevel: 0,
+            neutralTarget: 5,
+            enemyTarget: 10,
+            knightsTarget: 10,
+            archersTarget: 20,
+            cavalryTarget: 30,
+            warehouseTarget: 3,
+            fortressTarget: 3,
+            productionTarget: 3,
+            neutralCompleted: false,
+            enemyCompleted: false,
+            knightsCompleted: false,
+            archersCompleted: false,
+            cavalryCompleted: false,
+            warehouseCompleted: false,
+            fortressCompleted: false,
+            productionCompleted: false
+        };
+        
         // Speichere den zurückgesetzten Zustand
         saveGameState();
         
         // Aktualisiere alle Anzeigen
         updateDisplay();
         generateMap();
+        
+        // Aktualisiere Quest-Fortschritt
+        updateQuestProgress();
         
         alert('Spiel wurde zurückgesetzt!');
     }

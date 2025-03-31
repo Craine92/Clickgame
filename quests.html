@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die Stämme - Aufgaben</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="index.html" class="nav-btn">Dorf</a>
+            <a href="barracks.html" class="nav-btn">Kaserne</a>
+            <a href="map.html" class="nav-btn">Karte</a>
+            <a href="quests.html" class="nav-btn active">Aufgaben</a>
+            <span class="play-time-container">⏱️ <span class="play-time">00:00:00</span></span>
+        </nav>
+
+        <div class="top-bar">
+            <div class="resources">
+                <div class="resource">
+                    <span class="resource-icon">🌳</span>
+                    <span id="wood">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⛰️</span>
+                    <span id="clay">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚒️</span>
+                    <span id="iron">0</span>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <span id="crop">0</span>
+                </div>
+            </div>
+
+            <div class="units-display">
+                <div class="unit-count">
+                    <span class="unit-icon-small">⚔️</span>
+                    <span id="spearman-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🏹</span>
+                    <span id="archer-count">0</span>
+                </div>
+                <div class="unit-count">
+                    <span class="unit-icon-small">🐎</span>
+                    <span id="cavalry-count">0</span>
+                </div>
+                <div class="army-stats">
+                    <div class="stat">
+                        <span class="stat-icon">❤️</span>
+                        <span id="total-health">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">⚔️</span>
+                        <span id="total-attack">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-icon">🛡️</span>
+                        <span id="total-defense">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quests-container">
+            <h1>Aufgaben</h1>
+            <div class="quests-grid">
+                <div class="quest-card" id="quest-neutral">
+                    <h3>Neutrale Dörfer angreifen</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="neutral-progress"></div>
+                        </div>
+                        <span class="progress-text">0/5</span>
+                    </div>
+                    <p class="quest-description">Greife neutrale Dörfer an und plündere ihre Ressourcen</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>⚔️ 10 Ritter</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('neutral')" style="display: none;">Belohnung abholen</button>
+                </div>
+
+                <div class="quest-card" id="quest-enemy">
+                    <h3>Feindliche Dörfer angreifen</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="enemy-progress"></div>
+                        </div>
+                        <span class="progress-text">0/10</span>
+                    </div>
+                    <p class="quest-description">Greife feindliche Dörfer an und plündere ihre Ressourcen</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>🏹 15 Bogenschützen</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('enemy')" style="display: none;">Belohnung abholen</button>
+                </div>
+
+                <div class="quest-card" id="quest-knights">
+                    <h3>Ritter ausbilden</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="knights-progress"></div>
+                        </div>
+                        <span class="progress-text">0/10</span>
+                    </div>
+                    <p class="quest-description">Bilde Ritter in der Kaserne aus</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>🌳 1000 Holz</li>
+                            <li>⛰️ 1000 Lehm</li>
+                            <li>🌾 1000 Getreide</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('knights')" style="display: none;">Belohnung abholen</button>
+                </div>
+
+                <div class="quest-card" id="quest-archers">
+                    <h3>Bogenschützen ausbilden</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="archers-progress"></div>
+                        </div>
+                        <span class="progress-text">0/20</span>
+                    </div>
+                    <p class="quest-description">Bilde Bogenschützen in der Kaserne aus</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>🐎 10 Kavallerie</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('archers')" style="display: none;">Belohnung abholen</button>
+                </div>
+
+                <div class="quest-card" id="quest-cavalry">
+                    <h3>Kavallerie ausbilden</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="cavalry-progress"></div>
+                        </div>
+                        <span class="progress-text">0/30</span>
+                    </div>
+                    <p class="quest-description">Bilde Kavallerie in der Kaserne aus</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>⚔️ 15 Ritter</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('cavalry')" style="display: none;">Belohnung abholen</button>
+                </div>
+
+                <div class="quest-card" id="quest-warehouse">
+                    <h3>Lagerhaus ausbauen</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="warehouse-progress"></div>
+                        </div>
+                        <span class="progress-text">0/3</span>
+                    </div>
+                    <p class="quest-description">Erreiche Stufe 3 beim Lagerhaus</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>🏹 20 Bogenschützen</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('warehouse')" style="display: none;">Belohnung abholen</button>
+                </div>
+
+                <div class="quest-card" id="quest-fortress">
+                    <h3>Festung ausbauen</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="fortress-progress"></div>
+                        </div>
+                        <span class="progress-text">0/3</span>
+                    </div>
+                    <p class="quest-description">Erreiche Stufe 3 bei der Festung</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>🐎 15 Kavallerie</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('fortress')" style="display: none;">Belohnung abholen</button>
+                </div>
+
+                <div class="quest-card" id="quest-production">
+                    <h3>Produktionsgebäude ausbauen</h3>
+                    <div class="quest-progress">
+                        <div class="progress-bar">
+                            <div class="progress" id="production-progress"></div>
+                        </div>
+                        <span class="progress-text">0/3</span>
+                    </div>
+                    <p class="quest-description">Erreiche Stufe 3 bei allen Produktionsgebäuden</p>
+                    <div class="quest-reward">
+                        <p>Belohnung:</p>
+                        <ul>
+                            <li>⚔️ 20 Ritter</li>
+                        </ul>
+                    </div>
+                    <button class="collect-reward-btn" onclick="collectReward('production')" style="display: none;">Belohnung abholen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html> 
